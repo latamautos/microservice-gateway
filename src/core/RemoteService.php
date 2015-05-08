@@ -152,6 +152,13 @@ abstract class RemoteService {
 		$response = $this->restClient->delete($this->domain . $uri . "/" . $args["id"], $queryString);
 		return $this->createResponse($response);
 	}
+	public function show(array $args, array $queryString = array ()) {
+		if ($queryString == null) $queryString = array ();
+		$uri = $this->replaceUriParams($args);
+		$args = $this->checkValidId($args);
+		$response = $this->restClient->get($this->domain . $uri . "/" . $args["id"], $queryString);
+		return $this->createResponse($response);
+	}
 
 	/**
 	 * @param mixed $dto
