@@ -11,6 +11,8 @@ namespace Latamautos\MicroserviceGateway\core;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
+use JMS\Serializer\Naming\IdenticalPropertyNamingStrategy;
+use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
 use JMS\Serializer\SerializerBuilder;
 
 abstract class RemoteService {
@@ -29,8 +31,9 @@ abstract class RemoteService {
 	private $notificationParser;
 	private $restClient;
 
+
 	function __construct() {
-		$this->serializer = SerializerBuilder::create()->build();
+		$this->serializer = SerializerBuilder::create()->setPropertyNamingStrategy(new SerializedNameAnnotationStrategy(new IdenticalPropertyNamingStrategy()))->build();
 		$this->paginationParser = new PaginationParser();
 		$this->notificationParser = new NotificationParser();
 		$this->restClient = new Client();
@@ -107,28 +110,28 @@ abstract class RemoteService {
 
 	public function post(array $args = array (), $body = null, array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
-		$queryString["json"] = !is_array($body)?json_encode($body):$body;
+		$queryString["json"] = !is_array($body) ? json_encode($body) : $body;
 		$uri = $this->replaceUriParams($args);
 		$response = $this->restClient->post($this->domain . $uri, $queryString);
 		return $this->createResponse($response);
 	}
 
-	public function put(array $args= array (), $body=null, array $queryString= array ()) {
+	public function put(array $args = array (), $body = null, array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
-		$queryString["json"] = !is_array($body)?json_encode($body):$body;
+		$queryString["json"] = !is_array($body) ? json_encode($body) : $body;
 		$uri = $this->replaceUriParams($args);
 		$response = $this->restClient->put($this->domain . $uri, $queryString);
 		return $this->createResponse($response);
 	}
 
-	public function del(array $args= array (), array $queryString= array ()) {
+	public function del(array $args = array (), array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
 		$uri = $this->replaceUriParams($args);
 		$response = $this->restClient->put($this->domain . $uri, $queryString);
 		return $this->createResponse($response);
 	}
 
-	public function store(array $args= array (), $body, array $queryString = array ()) {
+	public function store(array $args = array (), $body, array $queryString = array ()) {
 		return $this->post($args, $body, $queryString);
 	}
 
@@ -138,7 +141,7 @@ abstract class RemoteService {
 
 	public function update(array $args, $body, array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
-		$queryString["json"] = !is_array($body)?json_encode($body):$body;
+		$queryString["json"] = !is_array($body) ? json_encode($body) : $body;
 		$uri = $this->replaceUriParams($args);
 		$args = $this->checkValidId($args);
 		$response = $this->restClient->put($this->domain . $uri . "/" . $args["id"], $queryString);
@@ -152,6 +155,7 @@ abstract class RemoteService {
 		$response = $this->restClient->delete($this->domain . $uri . "/" . $args["id"], $queryString);
 		return $this->createResponse($response);
 	}
+
 	public function show(array $args, array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
 		$uri = $this->replaceUriParams($args);

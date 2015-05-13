@@ -9,6 +9,7 @@
 namespace Latamautos\MicroserviceGateway\core;
 
 
+use JMS\Serializer\Naming\IdenticalPropertyNamingStrategy;
 use JMS\Serializer\SerializerBuilder;
 
 class NotificationParser {
@@ -21,7 +22,7 @@ class NotificationParser {
 	private $serializer;
 
 	function __construct() {
-		$this->serializer = SerializerBuilder::create()->build();
+		$this->serializer = SerializerBuilder::create()->setPropertyNamingStrategy(new IdenticalPropertyNamingStrategy())->build();
 	}
 
 
