@@ -51,7 +51,7 @@ abstract class RemoteService {
 
 		if (!isset($deserializedArray[self::DATA])) return $baseResponse;
 
-		if (array_values($deserializedArray) === $deserializedArray) {
+		if (array_values($deserializedArray[self::DATA]) === $deserializedArray[self::DATA]) {
 			$objectList = new ArrayCollection();
 
 			foreach ($deserializedArray[self::DATA] as $objectAsArray) {
