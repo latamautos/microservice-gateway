@@ -107,7 +107,7 @@ abstract class RemoteService {
 	public function get(array $args = array (), array $queryString = array (), RestPagination $restPagination = null) {
 		if ($queryString == null) $queryString = array ();
 		$uri = $this->replaceUriParams($args);
-		$response = $this->restClient->get($this->domain . $uri, $queryString);
+		$response = $this->restClient->get($this->domain . $uri, ["query"=>$queryString]);
 		return $this->createResponse($response);
 	}
 
@@ -115,7 +115,7 @@ abstract class RemoteService {
 		if ($queryString == null) $queryString = array ();
 		$queryString["json"] = !is_array($body)?json_encode($body):$body;
 		$uri = $this->replaceUriParams($args);
-		$response = $this->restClient->post($this->domain . $uri, $queryString);
+		$response = $this->restClient->post($this->domain . $uri, ["query"=>$queryString]);
 		return $this->createResponse($response);
 	}
 
@@ -123,23 +123,23 @@ abstract class RemoteService {
 		if ($queryString == null) $queryString = array ();
 		$queryString["json"] = !is_array($body)?json_encode($body):$body;
 		$uri = $this->replaceUriParams($args);
-		$response = $this->restClient->put($this->domain . $uri, $queryString);
+		$response = $this->restClient->put($this->domain . $uri, ["query"=>$queryString]);
 		return $this->createResponse($response);
 	}
 
 	public function del(array $args= array (), array $queryString= array ()) {
 		if ($queryString == null) $queryString = array ();
 		$uri = $this->replaceUriParams($args);
-		$response = $this->restClient->put($this->domain . $uri, $queryString);
+		$response = $this->restClient->put($this->domain . $uri, ["query"=>$queryString]);
 		return $this->createResponse($response);
 	}
 
 	public function store(array $args= array (), $body, array $queryString = array ()) {
-		return $this->post($args, $body, $queryString);
+		return $this->post($args, $body, ["query"=>$queryString]);
 	}
 
 	public function index(array $args = array (), array $queryString = array (), RestPagination $restPagination = null) {
-		return $this->get($args, $queryString, $restPagination);
+		return $this->get($args, ["query"=>$queryString], $restPagination);
 	}
 
 	public function update(array $args, $body, array $queryString = array ()) {
@@ -147,7 +147,7 @@ abstract class RemoteService {
 		$queryString["json"] = !is_array($body)?json_encode($body):$body;
 		$uri = $this->replaceUriParams($args);
 		$args = $this->checkValidId($args);
-		$response = $this->restClient->put($this->domain . $uri . "/" . $args["id"], $queryString);
+		$response = $this->restClient->put($this->domain . $uri . "/" . $args["id"], ["query"=>$queryString]);
 		return $this->createResponse($response);
 	}
 
@@ -155,14 +155,14 @@ abstract class RemoteService {
 		if ($queryString == null) $queryString = array ();
 		$uri = $this->replaceUriParams($args);
 		$args = $this->checkValidId($args);
-		$response = $this->restClient->delete($this->domain . $uri . "/" . $args["id"], $queryString);
+		$response = $this->restClient->delete($this->domain . $uri . "/" . $args["id"], ["query"=>$queryString]);
 		return $this->createResponse($response);
 	}
 	public function show(array $args, array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
 		$uri = $this->replaceUriParams($args);
 		$args = $this->checkValidId($args);
-		$response = $this->restClient->get($this->domain . $uri . "/" . $args["id"], $queryString);
+		$response = $this->restClient->get($this->domain . $uri . "/" . $args["id"], ["query"=>$queryString]);
 		return $this->createResponse($response);
 	}
 
