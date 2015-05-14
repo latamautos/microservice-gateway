@@ -11,12 +11,10 @@ namespace Latamautos\MicroserviceGateway\core;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ServerException;
 use JMS\Serializer\Annotation\Type;
-use JMS\Serializer\Naming\CamelCaseNamingStrategy;
 use JMS\Serializer\Naming\IdenticalPropertyNamingStrategy;
-use JMS\Serializer\Naming\SerializedNameAnnotationStrategy;
 use JMS\Serializer\SerializerBuilder;
-use JMS\Serializer\Tests\Serializer\Naming\IdenticalPropertyNamingStrategyTest;
 
 abstract class RemoteService {
 
@@ -53,16 +51,20 @@ abstract class RemoteService {
 
 		if (!isset($deserializedArray[self::DATA])) return $baseResponse;
 
-		if (array_values($deserializedArray[self::DATA]) === $deserializedArray[self::DATA]) {
-			$objectList = new ArrayCollection();
+		if (is_scalar($deserializedArray[self::DATA])) {
+			$baseResponse->setData($deserializedArray[self::DATA]);
+		} else
 
-			foreach ($deserializedArray[self::DATA] as $objectAsArray) {
-				$objectList->add($this->serializer->deserialize(json_encode($objectAsArray), get_class($this->dto), self::RESPONSE_FORMAT));
+			if (array_values($deserializedArray[self::DATA]) === $deserializedArray[self::DATA]) {
+				$objectList = new ArrayCollection();
+
+				foreach ($deserializedArray[self::DATA] as $objectAsArray) {
+					$objectList->add($this->serializer->deserialize(json_encode($objectAsArray), get_class($this->dto), self::RESPONSE_FORMAT));
+				}
+				$baseResponse->setData($objectList);
+			} else {
+				$baseResponse->setData($this->serializer->deserialize(json_encode($deserializedArray[self::DATA]), get_class($this->dto), self::RESPONSE_FORMAT));
 			}
-			$baseResponse->setData($objectList);
-		} else {
-			$baseResponse->setData($this->serializer->deserialize(json_encode($deserializedArray[self::DATA]), get_class($this->dto), self::RESPONSE_FORMAT));
-		}
 
 
 		return $baseResponse;
@@ -109,34 +111,58 @@ abstract class RemoteService {
 	public function get(array $args = array (), array $queryString = array (), RestPagination $restPagination = null) {
 		if ($queryString == null) $queryString = array ();
 		$uri = $this->replaceUriParams($args);
-		$response = $this->restClient->get($this->domain . $uri, [self::QUERY =>$queryString]);
+		try {
+			$response = $this->restClient->get($this->domain . $uri, [self::QUERY => $queryString]);
+		} catch (ServerException $e) {
+			$response = $e->getResponse();
+		}
+
 		return $this->createResponse($response);
 	}
 
 	public function post(array $args = array (), $body = null, array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
-		$queryString["json"] = !is_array($body)?json_encode($body):$body;
+		$queryString = array (self::QUERY => $queryString);
+		$queryString["json"] = !is_array($body) ? json_decode($this->serializer->serialize($body, "json"), true) : $body;
+
+
 		$uri = $this->replaceUriParams($args);
-		$response = $this->restClient->post($this->domain . $uri, [self::QUERY =>$queryString]);
+		try {
+			$response = $this->restClient->post($this->domain . $uri, $queryString);
+		} catch (ServerException $e) {
+			$response = $e->getResponse();
+		}
+
 		return $this->createResponse($response);
 	}
 
-	public function put(array $args= array (), $body=null, array $queryString= array ()) {
+	public function put(array $args = array (), $body = null, array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
-		$queryString["json"] = !is_array($body)?json_encode($body):$body;
+		$queryString = array (self::QUERY => $queryString);
+		$queryString["json"] = !is_array($body) ? json_decode($this->serializer->serialize($body, "json"), true) : $body;
 		$uri = $this->replaceUriParams($args);
-		$response = $this->restClient->put($this->domain . $uri, [self::QUERY =>$queryString]);
+		try {
+			$response = $this->restClient->put($this->domain . $uri, $queryString);
+		} catch (ServerException $e) {
+			$response = $e->getResponse();
+		}
+
 		return $this->createResponse($response);
 	}
 
-	public function del(array $args= array (), array $queryString= array ()) {
+	public function del(array $args = array (), array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
 		$uri = $this->replaceUriParams($args);
-		$response = $this->restClient->put($this->domain . $uri, [self::QUERY =>$queryString]);
+		try {
+			$response = $this->restClient->put($this->domain . $uri, [self::QUERY => $queryString]);
+		} catch (ServerException $e) {
+			$response = $e->getResponse();
+		}
+
 		return $this->createResponse($response);
 	}
 
-	public function store(array $args= array (), $body, array $queryString = array ()) {
+	public function store(array $args = array (), $body, array $queryString = array ()) {
 		return $this->post($args, $body, $queryString);
 	}
 
@@ -145,11 +171,17 @@ abstract class RemoteService {
 	}
 
 	public function update(array $args, $body, array $queryString = array ()) {
-		if ($queryString == null) $queryString = array ();
-		$queryString["json"] = !is_array($body)?json_encode($body):$body;
-		$uri = $this->replaceUriParams($args);
 		$args = $this->checkValidId($args);
-		$response = $this->restClient->put($this->domain . $uri . "/" . $args["id"], $queryString);
+		if ($queryString == null) $queryString = array ();
+		$queryString = array (self::QUERY => $queryString);
+		$queryString["json"] = !is_array($body) ? json_decode($this->serializer->serialize($body, "json"), true) : $body;
+		$uri = $this->replaceUriParams($args);
+		try {
+			$response = $this->restClient->put($this->domain . $uri . "/" . $args["id"], $queryString);
+		} catch (ServerException $e) {
+			$response = $e->getResponse();
+		}
+
 		return $this->createResponse($response);
 	}
 
@@ -157,14 +189,26 @@ abstract class RemoteService {
 		if ($queryString == null) $queryString = array ();
 		$uri = $this->replaceUriParams($args);
 		$args = $this->checkValidId($args);
-		$response = $this->restClient->delete($this->domain . $uri . "/" . $args["id"], $queryString);
+
+		try {
+			$response = $this->restClient->delete($this->domain . $uri . "/" . $args["id"], $queryString);
+		} catch (ServerException $e) {
+			$response = $e->getResponse();
+		}
+
 		return $this->createResponse($response);
 	}
+
 	public function show(array $args, array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
 		$uri = $this->replaceUriParams($args);
 		$args = $this->checkValidId($args);
-		$response = $this->restClient->get($this->domain . $uri . "/" . $args["id"], $queryString);
+		try {
+			$response = $this->restClient->get($this->domain . $uri . "/" . $args["id"], $queryString);
+		} catch (ServerException $e) {
+			$response = $e->getResponse();
+		}
+
 		return $this->createResponse($response);
 	}
 
