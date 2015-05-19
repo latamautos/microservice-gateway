@@ -10,14 +10,15 @@ namespace Latamautos\MicroserviceGateway\core;
 
 
 interface IResource {
+	public function setPathParams($pathParamsArray = array ());
 
-	public function store(array $args = array (), $body, array $queryString = array ());
+	public function store($body, array $queryString = array ());
 
-	public function index(array $args = array (), array $queryString = array (), RestPagination $restPagination = null);
+	public function index(array $queryString = array ());
 
-	public function update(array $args, $body, array $queryString = array ());
+	public function update($id, $body, array $queryString = array ());
 
-	public function delete(array $args, array $queryString = array ());
+	public function delete($id, array $queryString = array ());
 
-	public function show(array $args, array $queryString = array ());
+	public function show($id, array $queryString = array ());
 } 
