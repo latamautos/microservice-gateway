@@ -191,7 +191,7 @@ abstract class RemoteService {
 		$args = $this->checkValidId($id);
 
 		try {
-			$response = $this->restClient->delete($this->domain . $this->processedURI . "/" . $id, [self::QUERY => $queryString]);
+			$response = $this->restClient->delete($this->domain . $this->processedURI . "/" . $id, $queryString);
 		} catch (ServerException $e) {
 			$response = $e->getResponse();
 		}
@@ -203,7 +203,7 @@ abstract class RemoteService {
 		if ($queryString == null) $queryString = array ();
 		$args = $this->checkValidId($id);
 		try {
-			$response = $this->restClient->get($this->domain . $this->processedURI . "/" . $id, [self::QUERY => $queryString]);
+			$response = $this->restClient->get($this->domain . $this->processedURI . "/" . $id, $queryString);
 		} catch (ServerException $e) {
 			$response = $e->getResponse();
 		}
