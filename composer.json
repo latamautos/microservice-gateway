@@ -13,7 +13,7 @@
 		"nategood/httpful": "*",
 		"jms/serializer": "0.17.*@dev",
 		"doctrine/collections": "~1.1",
-		"phpunit/phpunit": "4.3.*",
+		"phpunit/phpunit": "4.3.0",
 		"mockery/mockery": "dev-master",
 		"guzzlehttp/guzzle":"~5.0"
 	},
