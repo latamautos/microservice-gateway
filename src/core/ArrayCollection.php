@@ -17,8 +17,9 @@ class ArrayCollection extends \Doctrine\Common\Collections\ArrayCollection {
 	}
 
 	public function findById($id) {
-		$resultArray = $this->filter(function ($entry) use ($id) {
-			return is_object($entry) && method_exists($entry, "getId") && $entry->getId() == $id;
+		$resultArray = array_filter($this->getValues(), function ($entry) use ($id) {
+			$a= is_object($entry) && method_exists($entry, "getId") && ($entry->getId() == $id);
+			return $a;
 		});
 		if (!empty($resultArray) && is_array($resultArray)) {
 			return $resultArray[0];
