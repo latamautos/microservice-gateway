@@ -15,6 +15,8 @@ interface IResource {
 
 	public function setQueryParams($queryParamsArray = array ());
 
+	public function getProcessedURI($objectOrId=null);
+
 	public function store($body, array $queryString = array ());
 
 	public function index(array $queryString = array ());
