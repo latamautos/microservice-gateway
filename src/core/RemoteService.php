@@ -9,7 +9,7 @@
 namespace Latamautos\MicroserviceGateway\core;
 
 
-use Doctrine\Common\Collections\ArrayCollection;
+use Latamautos\MicroserviceGateway\core\ArrayCollection;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ServerException;
 use JMS\Serializer\Annotation\Type;
