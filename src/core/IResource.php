@@ -10,7 +10,10 @@ namespace Latamautos\MicroserviceGateway\core;
 
 
 interface IResource {
+
 	public function setPathParams($pathParamsArray = array ());
+
+	public function setQueryParams($queryParamsArray = array ());
 
 	public function store($body, array $queryString = array ());
 

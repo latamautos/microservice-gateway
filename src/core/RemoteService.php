@@ -32,6 +32,7 @@ abstract class RemoteService {
 	private $notificationParser;
 	private $restClient;
 	private $processedURI;
+	private $queryParams;
 
 	const QUERY = "query";
 
@@ -45,6 +46,10 @@ abstract class RemoteService {
 
 	public function setPathParams($pathParamsArray = array ()) {
 		$this->processedURI = $this->replaceUriParams($pathParamsArray);
+	}
+
+	public function setQueryParams($queryParamsArray = array ()) {
+		$this->queryParams = $queryParamsArray;
 	}
 
 
@@ -117,7 +122,7 @@ abstract class RemoteService {
 	public function get(array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
 		try {
-			$response = $this->restClient->get($this->domain . $this->processedURI, [self::QUERY => $queryString]);
+			$response = $this->restClient->get($this->domain . $this->processedURI, $this->mergeQueryString($queryString));
 		} catch (ServerException $e) {
 			$response = $e->getResponse();
 		}
@@ -125,9 +130,13 @@ abstract class RemoteService {
 		return $this->createResponse($response);
 	}
 
+	private function mergeQueryString($newQueryStringParams) {
+		return [self::QUERY => array_merge($this->queryParams, $newQueryStringParams)];
+	}
+
 	public function post($body = null, array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
-		$queryString = array (self::QUERY => $queryString);
+		$queryString = $this->mergeQueryString($queryString);
 		$queryString["json"] = !is_array($body) ? json_decode($this->serializer->serialize($body, "json"), true) : $body;
 
 
@@ -142,7 +151,7 @@ abstract class RemoteService {
 
 	public function put($body = null, array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
-		$queryString = array (self::QUERY => $queryString);
+		$queryString = $this->mergeQueryString($queryString);
 		$queryString["json"] = !is_array($body) ? json_decode($this->serializer->serialize($body, "json"), true) : $body;
 		try {
 			$response = $this->restClient->put($this->domain . $this->processedURI, $queryString);
@@ -156,7 +165,7 @@ abstract class RemoteService {
 	public function del(array $queryString = array ()) {
 		if ($queryString == null) $queryString = array ();
 		try {
-			$response = $this->restClient->delete($this->domain . $this->processedURI, [self::QUERY => $queryString]);
+			$response = $this->restClient->delete($this->domain . $this->processedURI, $this->mergeQueryString($queryString));
 		} catch (ServerException $e) {
 			$response = $e->getResponse();
 		}
@@ -175,7 +184,7 @@ abstract class RemoteService {
 	public function update($id, $body, array $queryString = array ()) {
 		$args = $this->checkValidId($id);
 		if ($queryString == null) $queryString = array ();
-		$queryString = array (self::QUERY => $queryString);
+		$queryString = $this->mergeQueryString($queryString);
 		$queryString["json"] = !is_array($body) ? json_decode($this->serializer->serialize($body, "json"), true) : $body;
 		try {
 			$response = $this->restClient->put($this->domain . $this->processedURI . "/" . $id, $queryString);
@@ -191,7 +200,7 @@ abstract class RemoteService {
 		$args = $this->checkValidId($id);
 
 		try {
-			$response = $this->restClient->delete($this->domain . $this->processedURI . "/" . $id, $queryString);
+			$response = $this->restClient->delete($this->domain . $this->processedURI . "/" . $id, $this->mergeQueryString($queryString));
 		} catch (ServerException $e) {
 			$response = $e->getResponse();
 		}
@@ -203,7 +212,7 @@ abstract class RemoteService {
 		if ($queryString == null) $queryString = array ();
 		$args = $this->checkValidId($id);
 		try {
-			$response = $this->restClient->get($this->domain . $this->processedURI . "/" . $id, $queryString);
+			$response = $this->restClient->get($this->domain . $this->processedURI . "/" . $id, $this->mergeQueryString($queryString));
 		} catch (ServerException $e) {
 			$response = $e->getResponse();
 		}
