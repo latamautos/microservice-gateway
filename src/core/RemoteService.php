@@ -43,6 +43,7 @@ abstract class RemoteService
         $this->paginationParser = new PaginationParser();
         $this->notificationParser = new NotificationParser();
         $this->restClient = new Client();
+			$this->queryParams = [];
         $type = new Type();
     }
 
@@ -76,6 +77,7 @@ abstract class RemoteService
     public function deserializeResponse($deserializedArray)
     {
         $baseResponse = new BaseResponse();
+			  $
 
         $this->paginationParser->generateFromDeserializedArray($deserializedArray, $baseResponse);
         $this->notificationParser->generateFromDeserializedArray($deserializedArray, $baseResponse);
