@@ -77,7 +77,6 @@ abstract class RemoteService
     public function deserializeResponse($deserializedArray)
     {
         $baseResponse = new BaseResponse();
-			  $
 
         $this->paginationParser->generateFromDeserializedArray($deserializedArray, $baseResponse);
         $this->notificationParser->generateFromDeserializedArray($deserializedArray, $baseResponse);
